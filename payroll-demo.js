@@ -74,6 +74,24 @@
         </div>`
     },
     {
+      id: "compliance",
+      label: "Automatic compliance",
+      description: "Illustrative view showing that payroll-linked compliance calculations are handled automatically as part of the flow.",
+      narration: "Along with the payroll run, the compliance calculations are handled automatically. I’d call this out because it removes another manual calculation step from the payroll workflow.",
+      objective: "Show automatic compliance calculation as a core Payroll value point.",
+      body: () => `
+        <div class="stat-grid">
+          <div class="stat"><span>Calculation mode</span><strong>Automatic</strong></div>
+          <div class="stat"><span>Payroll-linked inputs</span><strong>Included</strong></div>
+          <div class="stat"><span>Review status</span><strong>Ready to review</strong></div>
+        </div>
+        <div class="workflow">
+          <div class="step"><small>Step 1</small><strong>Payroll inputs captured</strong></div>
+          <div class="step"><small>Step 2</small><strong>Compliance calculated</strong></div>
+          <div class="step"><small>Step 3</small><strong>Review before completion</strong></div>
+        </div>`
+    },
+    {
       id: "f_and_f",
       label: "F&F / employee exit",
       description: "Illustrative employee-exit section for merchants who mention full-and-final settlement.",
@@ -112,6 +130,9 @@
     payroll: "payroll_run",
     payroll_run: "payroll_run",
     attendance: "attendance",
+    compliance: "compliance",
+    automatic_compliance: "compliance",
+    compliance_calculation: "compliance",
     reports: "reports",
     reporting: "reports",
     employee_setup: "employee_setup"
