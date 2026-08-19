@@ -1,0 +1,18 @@
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# macOS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Local runtime files
+*.log
