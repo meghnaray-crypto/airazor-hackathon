@@ -8,6 +8,8 @@
     attendance: "Attendance",
     f_and_f: "F&F / employee exit",
     payroll_run: "Payroll run",
+    compliance: "Automatic compliance",
+    automatic_compliance: "Automatic compliance",
     reports: "Reports"
   };
 
