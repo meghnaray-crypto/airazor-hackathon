@@ -1,17 +1,17 @@
 # AIRazor Backend Contract
 
-The browser currently uses deterministic mock logic so the UI can be reviewed before backend work begins.
-For real conversational understanding, the frontend should call an AIRazor backend. Supabase is the knowledge source, but it is not the conversation engine.
+This contract is the stable boundary between the shared AIRazor frontend and the real backend brain. The current frontend may still fall back to mock logic until `/api/chat` is connected to Supabase + the LLM.
 
 ## Target flow
 
 ```text
 Frontend
   -> POST /api/chat
-  -> session/conversation state
+  -> session / conversation state
   -> intent + multi-intent extraction
-  -> qualification/decision rules
-  -> Supabase RAG retrieval
+  -> qualification / decision rules
+  -> Supabase official knowledge retrieval
+  -> approved learning-case retrieval
   -> LLM response generation
   -> structured response to frontend
 ```
@@ -28,7 +28,7 @@ Content-Type: application/json
 ```json
 {
   "session_id": "8d2ac11d-...",
-  "message": "I want payouts, customer collections, and I am hiring 50 employees.",
+  "message": "I have 120 employees and attendance and F&F are painful.",
   "selected_plan_id": null,
   "action": null
 }
@@ -38,55 +38,61 @@ Content-Type: application/json
 
 ```json
 {
-  "reply": "I picked up three separate needs: vendor payouts, customer payment collection, and payroll. Which one do you want to solve first?",
-  "conversation_status": "needs_priority",
+  "reply": "Understood. I will keep the Payroll demo focused on attendance and employee exits.",
+  "conversation_status": "active",
   "stage": "qualification",
   "detected_needs": [
-    {"type": "vendor_payouts", "label": "Vendor / supplier payouts"},
-    {"type": "payment_gateway", "label": "Customer payment collection"},
-    {"type": "payroll", "label": "Employee / payroll requirement"}
+    {"type": "payroll", "label": "Payroll"}
   ],
+  "primary_requirement": "payroll",
+  "secondary_needs": [],
   "merchant_profile": {
     "business_model": null,
-    "primary_requirement": null,
-    "secondary_needs": ["Customer payment collection", "Employee / payroll requirement"],
-    "recipients": null,
-    "scale": "50 employees",
-    "frequency": null,
+    "employee_count": 120,
+    "pain_points": ["attendance", "f_and_f"],
     "existing_setup": null,
     "serviceability": "Qualification in progress"
   },
-  "missing_fields": ["priority_requirement"],
+  "missing_fields": ["existing_payroll_setup"],
   "recommendation": null,
   "plans": [],
   "commercials": [],
   "required_details": [],
   "payment_link": null,
-  "next_actions": [
-    {"id": "vendor_payouts", "label": "Solve vendor payouts first"},
-    {"id": "payment_gateway", "label": "Solve payment collection first"},
-    {"id": "payroll", "label": "Solve payroll first"}
-  ],
+  "demo": {
+    "should_start": false,
+    "focus_modules": ["attendance", "f_and_f"],
+    "current_module": null
+  },
+  "handoff": {
+    "required": false,
+    "type": null,
+    "reason": null,
+    "sla_hours": null
+  },
+  "next_actions": [],
   "retrieval": []
 }
 ```
 
-## Conversation requirements
+## Conversation rules
 
-The backend must preserve all merchant requirements in session state. A new requirement must not silently overwrite an earlier one.
+- Preserve all merchant requirements in session state. A new requirement must not silently overwrite an earlier one.
+- If the merchant asks whether AIRazor understood them, summarize every active need, captured fact, missing fact, and current recommendation before moving forward.
+- If the merchant changes topics, keep the previous need as an open/secondary need unless the merchant explicitly discards it.
+- A recommendation is allowed only after enough qualification data has been collected.
+- Product facts, pricing, serviceability, product URLs and payment links must come from approved backend data or approved actions. The LLM must never invent them.
+- If a product requires specialist support, return a structured `handoff` object instead of pretending the flow is self-serve.
 
-If the merchant asks "did you understand me?", the backend should summarize every active need, captured facts, missing facts, and the current recommendation instead of moving the journey forward.
-
-If the merchant switches topics, store the old requirement as a secondary/open need unless the merchant explicitly asks to discard it.
-
-A recommendation is allowed only when the relevant qualification fields are sufficient. Do not mark "recommendation ready" just because one product keyword was detected.
-
-The backend should explicitly close each journey with one of these outcomes:
+## Supported conversation outcomes
 
 - `needs_more_information`
+- `needs_priority`
 - `not_serviceable`
 - `recommendation_ready`
+- `demo_ready`
 - `commercials_ready`
+- `handoff_ready`
 - `payment_ready`
 - `onboarding_ready`
 - `completed`
@@ -112,13 +118,19 @@ The backend should explicitly close each journey with one of these outcomes:
 }
 ```
 
-The backend must:
+The backend must validate serviceability and qualification, retrieve the latest approved commercial, confirm mandatory merchant details, call the approved internal payment-link service, return the verified URL, and record the next onboarding action.
 
-1. Validate serviceability and qualification.
-2. Fetch the latest approved product, plan and commercial data from Supabase.
-3. Confirm all mandatory merchant details are available.
-4. Call the approved internal payment-link service.
-5. Return the generated URL.
-6. Record the next onboarding action.
+## Magic Checkout specialist handoff example
 
-The LLM must never invent pricing, serviceability, product URLs or payment links.
+```json
+{
+  "handoff": {
+    "required": true,
+    "type": "specialist_slack",
+    "reason": "Magic Checkout specialist support required",
+    "sla_hours": 48
+  }
+}
+```
+
+Keep the SLA configurable in backend data. Do not hardcode it in the LLM prompt.
