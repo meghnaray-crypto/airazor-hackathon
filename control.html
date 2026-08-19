@@ -20,7 +20,7 @@
     .badge.good { background:#e8f7f1; color:#17654f; }
     .badge.warn { background:#fff4e5; color:#8a4b00; }
     .button-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
-    .control-button { border:0; border-radius:10px; padding:10px 13px; font-weight:700; cursor:pointer; background:#1f5ed8; color:white; }
+    .control-button { border:0; border-radius:10px; padding:10px 13px; font-weight:700; cursor:pointer; background:#1f5ed8; color:white; text-decoration:none; display:inline-block; }
     .control-button.secondary { background:#eef3ff; color:#2457b6; }
     .control-note { color:#667085; font-size:.82rem; line-height:1.5; margin-top:10px; }
     .wide { grid-column:1 / -1; }
@@ -74,6 +74,16 @@
         <div class="status-row"><span>3. Real /api/chat</span><span class="badge warn">Pending</span></div>
         <div class="status-row"><span>4. Tavus live test</span><span class="badge warn">Pending</span></div>
         <div class="status-row"><span>5. Slack handoff from backend</span><span class="badge warn">Pending</span></div>
+      </article>
+
+      <article class="control-card wide">
+        <h2>Prepared demo shells</h2>
+        <div class="status-row"><span>Personalised Payroll demo</span><span class="badge good">Ready</span></div>
+        <div class="button-row">
+          <a class="control-button" href="/payroll-demo.html?merchant=Demo%20Company&employees=120&focus=attendance,f_and_f">Open focused Payroll demo</a>
+          <a class="control-button secondary" href="/payroll-demo.html">Open general Payroll demo</a>
+        </div>
+        <p class="control-note">The focused link simulates tomorrow's AI output: 120 employees with Attendance + F&amp;F as the priority. Tomorrow `/api/chat` can launch the same page with merchant-specific query parameters.</p>
       </article>
 
       <article class="control-card wide">
