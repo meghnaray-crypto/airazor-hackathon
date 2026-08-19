@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AIRazor Payroll Demo</title>
+  <style>
+    :root {
+      --bg:#f5f8ff;
+      --panel:#ffffff;
+      --ink:#13213c;
+      --muted:#667085;
+      --line:#dfe6f2;
+      --blue:#2d63d6;
+      --blue-soft:#eaf1ff;
+      --navy:#14346c;
+      --green:#187a5b;
+      --green-soft:#e8f7f1;
+      --amber:#8a4b00;
+      --amber-soft:#fff4e5;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:linear-gradient(180deg,#f8faff 0%,var(--bg) 100%);
+      color:var(--ink);
+    }
+    button, a { font:inherit; }
+    .shell { max-width:1440px; margin:0 auto; padding:22px; }
+    .topbar {
+      display:flex; justify-content:space-between; align-items:center; gap:18px;
+      margin-bottom:18px;
+    }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .mark {
+      width:46px; height:46px; border-radius:14px; display:grid; place-items:center;
+      background:linear-gradient(145deg,#245ad0,#3782f7); color:white; font-weight:900;
+      box-shadow:0 10px 22px rgba(45,99,214,.18);
+    }
+    .brand h1 { margin:0; font-size:1.15rem; }
+    .brand p { margin:3px 0 0; color:var(--muted); font-size:.82rem; }
+    .top-actions { display:flex; gap:10px; }
+    .button {
+      border:1px solid var(--line); background:white; color:var(--ink); padding:10px 14px;
+      border-radius:11px; font-weight:750; text-decoration:none; cursor:pointer;
+    }
+    .button.primary { background:var(--blue); color:white; border-color:var(--blue); }
+    .hero {
+      display:grid; grid-template-columns:1.4fr .8fr; gap:18px; align-items:stretch;
+      background:linear-gradient(120deg,#102d63,#2f68dc); color:white; border-radius:24px;
+      padding:25px 28px; margin-bottom:18px; overflow:hidden;
+    }
+    .hero h2 { margin:5px 0 8px; font-size:2rem; }
+    .hero p { margin:0; color:#dce7ff; line-height:1.55; max-width:800px; }
+    .eyebrow { font-size:.72rem; font-weight:850; letter-spacing:.14em; text-transform:uppercase; opacity:.82; }
+    .hero-summary {
+      background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+      border-radius:18px; padding:16px 18px; align-self:center;
+    }
+    .hero-summary div { display:flex; justify-content:space-between; gap:14px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,.14); }
+    .hero-summary div:last-child { border-bottom:0; }
+    .hero-summary span { color:#dce7ff; font-size:.8rem; }
+    .hero-summary strong { text-align:right; font-size:.82rem; }
+    .workspace { display:grid; grid-template-columns:230px minmax(0,1fr) 330px; gap:18px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 8px 24px rgba(16,24,40,.045); }
+    .nav { padding:14px; position:sticky; top:18px; align-self:start; }
+    .nav h3 { margin:4px 6px 12px; font-size:.9rem; }
+    .module-list { display:flex; flex-direction:column; gap:7px; }
+    .module-button {
+      width:100%; text-align:left; border:0; border-radius:11px; padding:11px 12px; cursor:pointer;
+      background:transparent; color:#46516b; display:flex; justify-content:space-between; gap:10px;
+    }
+    .module-button:hover { background:#f5f7fb; }
+    .module-button.active { background:var(--blue-soft); color:#2056bd; font-weight:800; }
+    .module-button.focus::after { content:"Focus"; font-size:.65rem; font-weight:850; background:#dce9ff; padding:3px 6px; border-radius:999px; }
+    .module-button.covered::before { content:"✓"; color:var(--green); font-weight:900; margin-right:5px; }
+    .main-panel { padding:22px; min-height:640px; }
+    .module-head { display:flex; justify-content:space-between; align-items:start; gap:16px; margin-bottom:18px; }
+    .module-head h3 { margin:4px 0 5px; font-size:1.5rem; }
+    .module-head p { margin:0; color:var(--muted); line-height:1.5; }
+    .focus-badge { background:var(--green-soft); color:var(--green); border-radius:999px; padding:7px 10px; font-weight:800; font-size:.75rem; white-space:nowrap; }
+    .screen {
+      border:1px solid #d7e0f0; border-radius:16px; overflow:hidden; background:#fbfcff;
+    }
+    .screen-toolbar { display:flex; justify-content:space-between; align-items:center; padding:11px 13px; background:white; border-bottom:1px solid #e7ebf3; }
+    .screen-title { font-weight:800; font-size:.85rem; }
+    .demo-label { font-size:.68rem; font-weight:800; color:#825600; background:#fff6d8; padding:5px 7px; border-radius:999px; }
+    .screen-body { padding:18px; }
+    .stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:15px; }
+    .stat { background:white; border:1px solid #e3e8f2; border-radius:13px; padding:14px; }
+    .stat span { display:block; color:var(--muted); font-size:.72rem; margin-bottom:6px; }
+    .stat strong { font-size:1.2rem; }
+    .fake-table { background:white; border:1px solid #e3e8f2; border-radius:13px; overflow:hidden; }
+    .fake-row { display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:12px; padding:11px 13px; border-bottom:1px solid #eef1f6; font-size:.78rem; }
+    .fake-row:last-child { border-bottom:0; }
+    .fake-row.header { color:var(--muted); font-weight:800; background:#fafbfe; }
+    .workflow { display:flex; gap:10px; flex-wrap:wrap; }
+    .workflow .step { flex:1; min-width:140px; padding:14px; border:1px solid #e3e8f2; background:white; border-radius:13px; }
+    .workflow small { color:var(--muted); display:block; margin-bottom:6px; }
+    .module-actions { display:flex; justify-content:space-between; gap:10px; margin-top:18px; }
+    .side { padding:18px; position:sticky; top:18px; align-self:start; }
+    .side h3 { margin:0 0 12px; font-size:1rem; }
+    .host-card { border:1px solid #cfe0ff; background:#f6f9ff; border-radius:14px; padding:14px; }
+    .host-top { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
+    .host-avatar { width:42px; height:42px; border-radius:50%; display:grid; place-items:center; background:#245bc8; color:white; font-weight:900; }
+    .host-card p { margin:0; color:#46516b; font-size:.82rem; line-height:1.55; }
+    .pain-list { display:flex; flex-wrap:wrap; gap:7px; margin:10px 0 16px; }
+    .chip { padding:6px 8px; border-radius:999px; background:#eef2f8; color:#4c5872; font-size:.7rem; font-weight:800; }
+    .chip.focus { background:#e8f7f1; color:#17654f; }
+    .progress-wrap { margin-top:16px; }
+    .progress-line { height:8px; border-radius:999px; background:#edf1f7; overflow:hidden; }
+    .progress-fill { height:100%; width:0; background:linear-gradient(90deg,#2f67d8,#5f92ff); transition:width .25s ease; }
+    .progress-text { display:flex; justify-content:space-between; margin-top:7px; color:var(--muted); font-size:.72rem; }
+    .summary { margin-top:16px; padding:13px; border:1px solid #e3e8f2; border-radius:13px; background:white; }
+    .summary strong { display:block; margin-bottom:7px; }
+    .summary ul { padding-left:18px; margin:0; color:#4b5770; font-size:.78rem; line-height:1.55; }
+    .footer-note { text-align:center; color:#7a8599; font-size:.72rem; margin-top:20px; }
+    @media (max-width:1050px) {
+      .workspace { grid-template-columns:200px minmax(0,1fr); }
+      .side { grid-column:1 / -1; position:static; }
+    }
+    @media (max-width:760px) {
+      .hero { grid-template-columns:1fr; }
+      .workspace { grid-template-columns:1fr; }
+      .nav { position:static; }
+      .module-list { display:grid; grid-template-columns:repeat(2,1fr); }
+      .stat-grid { grid-template-columns:1fr; }
+      .topbar { align-items:flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">A</div>
+        <div>
+          <h1>AIRazor · Payroll demo</h1>
+          <p>Hackathon demo shell — personalised by merchant pain point</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <a href="/control.html" class="button">Control Room</a>
+        <a href="/" class="button">Merchant view</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">AI-led demo mode</div>
+        <h2 id="heroTitle">A focused Payroll walkthrough</h2>
+        <p id="heroCopy">AIRazor should show only the sections relevant to the merchant instead of forcing a generic end-to-end tour.</p>
+      </div>
+      <div class="hero-summary">
+        <div><span>Demo merchant</span><strong id="merchantName">Demo company</strong></div>
+        <div><span>Employee scale</span><strong id="employeeScale">Not provided</strong></div>
+        <div><span>Focus</span><strong id="focusSummary">General walkthrough</strong></div>
+      </div>
+    </section>
+
+    <main class="workspace">
+      <aside class="panel nav">
+        <h3>Demo modules</h3>
+        <div id="moduleList" class="module-list"></div>
+      </aside>
+
+      <section class="panel main-panel">
+        <div class="module-head">
+          <div>
+            <div class="eyebrow" style="color:#4a6aa5">Current section</div>
+            <h3 id="moduleTitle"></h3>
+            <p id="moduleDescription"></p>
+          </div>
+          <span id="focusBadge" class="focus-badge" hidden>Merchant priority</span>
+        </div>
+
+        <div class="screen">
+          <div class="screen-toolbar">
+            <span id="screenTitle" class="screen-title"></span>
+            <span class="demo-label">Illustrative hackathon screen</span>
+          </div>
+          <div id="screenBody" class="screen-body"></div>
+        </div>
+
+        <div class="module-actions">
+          <button id="previousModule" class="button">Previous</button>
+          <button id="markCovered" class="button primary">Mark covered & continue</button>
+        </div>
+      </section>
+
+      <aside class="panel side">
+        <h3>AIRazor demo host</h3>
+        <div class="host-card">
+          <div class="host-top">
+            <div class="host-avatar">AI</div>
+            <div>
+              <strong>Suggested narration</strong>
+              <div style="color:#667085;font-size:.7rem;margin-top:2px">Later spoken by Tavus</div>
+            </div>
+          </div>
+          <p id="narration"></p>
+        </div>
+
+        <div class="pain-list" id="painList"></div>
+
+        <div class="progress-wrap">
+          <strong style="font-size:.82rem">Demo progress</strong>
+          <div class="progress-line" style="margin-top:9px"><div id="progressFill" class="progress-fill"></div></div>
+          <div class="progress-text"><span id="progressText">0 covered</span><span id="progressPercent">0%</span></div>
+        </div>
+
+        <div class="summary">
+          <strong>Demo objective</strong>
+          <ul id="objectiveList"></ul>
+        </div>
+      </aside>
+    </main>
+
+    <p class="footer-note">This is a hackathon demo shell, not a representation of the current Razorpay Payroll production UI or an approved product-fact source.</p>
+  </div>
+  <script src="payroll-demo.js"></script>
+</body>
+</html>
