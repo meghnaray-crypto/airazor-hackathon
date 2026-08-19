@@ -1,9 +1,0 @@
-AIRazor GitHub upload bundle
-
-1. Unzip AIRazor_GitHub_Upload.zip.
-2. In GitHub > airazor-hackathon > Add file > Upload files.
-3. Drag ALL files from this unzipped folder into the upload area.
-4. Commit message: Add AIRazor application files
-5. Commit directly to main.
-
-Do not upload API keys or .env files.
