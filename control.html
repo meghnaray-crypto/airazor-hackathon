@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AIRazor Control Room</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { background:#f6f8fc; color:#13213c; }
+    .control-shell { max-width:1180px; margin:0 auto; padding:28px 22px 56px; }
+    .control-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px; }
+    .control-title h1 { margin:0; font-size:2rem; }
+    .control-title p { margin:6px 0 0; color:#667085; }
+    .control-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .control-card { background:white; border:1px solid #dde3ef; border-radius:18px; padding:20px; box-shadow:0 8px 26px rgba(16,24,40,.05); }
+    .control-card h2 { margin:0 0 14px; font-size:1rem; }
+    .status-row { display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid #eef1f6; }
+    .status-row:last-child { border-bottom:0; }
+    .badge { padding:5px 9px; border-radius:999px; font-size:.75rem; font-weight:700; background:#eef2f8; color:#475467; }
+    .badge.good { background:#e8f7f1; color:#17654f; }
+    .badge.warn { background:#fff4e5; color:#8a4b00; }
+    .button-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+    .control-button { border:0; border-radius:10px; padding:10px 13px; font-weight:700; cursor:pointer; background:#1f5ed8; color:white; }
+    .control-button.secondary { background:#eef3ff; color:#2457b6; }
+    .control-note { color:#667085; font-size:.82rem; line-height:1.5; margin-top:10px; }
+    .wide { grid-column:1 / -1; }
+    pre { background:#0f172a; color:#dbeafe; border-radius:12px; padding:14px; overflow:auto; min-height:110px; }
+    @media (max-width:800px) { .control-grid { grid-template-columns:1fr; } .wide { grid-column:auto; } }
+  </style>
+</head>
+<body>
+  <main class="control-shell">
+    <header class="control-header">
+      <div class="control-title">
+        <h1>AIRazor Control Room</h1>
+        <p>Internal hackathon controls, integration status and tomorrow-morning checklist.</p>
+      </div>
+      <a href="/" class="secondary-button">Merchant view</a>
+    </header>
+
+    <section class="control-grid">
+      <article class="control-card">
+        <h2>System status</h2>
+        <div class="status-row"><span>Backend</span><span id="backendStatus" class="badge">Checking</span></div>
+        <div class="status-row"><span>Supabase</span><span id="dbStatus" class="badge">Pending</span></div>
+        <div class="status-row"><span>LLM brain</span><span id="brainStatus" class="badge">Pending</span></div>
+        <div class="status-row"><span>Tavus</span><span id="tavusStatusControl" class="badge">Checking</span></div>
+        <div class="button-row">
+          <button id="refreshStatus" class="control-button">Refresh status</button>
+        </div>
+      </article>
+
+      <article class="control-card">
+        <h2>Learning memory</h2>
+        <div class="status-row"><span>Learning table</span><span class="badge good">Created</span></div>
+        <div class="status-row"><span>Approved lessons</span><span class="badge good">5</span></div>
+        <div class="status-row"><span>Pending review</span><span class="badge warn">1</span></div>
+        <div class="status-row"><span>Embeddings</span><span class="badge warn">Tomorrow</span></div>
+        <p class="control-note">Tomorrow this card will read live counts from Supabase and expose Generate Missing Embeddings.</p>
+      </article>
+
+      <article class="control-card">
+        <h2>Integration prep</h2>
+        <div class="status-row"><span>Shared Render URL</span><span class="badge good">Live</span></div>
+        <div class="status-row"><span>GitHub deployment</span><span class="badge good">Connected</span></div>
+        <div class="status-row"><span>Slack test channel</span><span class="badge good">Ready</span></div>
+        <div class="status-row"><span>Tavus credentials</span><span class="badge warn">Add tomorrow</span></div>
+      </article>
+
+      <article class="control-card">
+        <h2>Tomorrow morning</h2>
+        <div class="status-row"><span>1. Supabase connection</span><span class="badge warn">Pending</span></div>
+        <div class="status-row"><span>2. Learning embeddings</span><span class="badge warn">Pending</span></div>
+        <div class="status-row"><span>3. Real /api/chat</span><span class="badge warn">Pending</span></div>
+        <div class="status-row"><span>4. Tavus live test</span><span class="badge warn">Pending</span></div>
+        <div class="status-row"><span>5. Slack handoff from backend</span><span class="badge warn">Pending</span></div>
+      </article>
+
+      <article class="control-card wide">
+        <h2>API readiness test</h2>
+        <div class="button-row">
+          <button id="testStatus" class="control-button">Test /api/status</button>
+          <button id="testChat" class="control-button secondary">Test /api/chat</button>
+        </div>
+        <p class="control-note">Right now /api/chat is expected to report that the real brain is not connected. Tomorrow this same button becomes our fastest smoke test.</p>
+        <pre id="apiOutput">No test run yet.</pre>
+      </article>
+    </section>
+  </main>
+  <script src="airazor-api.js"></script>
+  <script src="control.js"></script>
+</body>
+</html>
