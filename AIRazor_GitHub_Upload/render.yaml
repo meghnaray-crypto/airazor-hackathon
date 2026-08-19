@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: airazor-hackathon
+    runtime: python
+    plan: free
+    buildCommand: "echo 'No build step required'"
+    startCommand: "python3 server.py"
+    healthCheckPath: /health
+    envVars:
+      - key: TAVUS_API_KEY
+        sync: false
+      - key: TAVUS_REPLICA_ID
+        sync: false
+      - key: TAVUS_PERSONA_ID
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
