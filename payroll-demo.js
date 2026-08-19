@@ -104,7 +104,7 @@
 
   const aliases = {
     f_and_f: "f_and_f",
-    f&f: "f_and_f",
+    "f&f": "f_and_f",
     fff: "f_and_f",
     final_settlement: "f_and_f",
     full_and_final: "f_and_f",
