@@ -22,18 +22,24 @@ DEFAULT_REPLICA_ID = "r90bbd427f71"
 DEFAULT_PERSONA_ID = "pcb7a34da5fe"
 DEFAULT_RAG_URL = "https://vtjyaafgmbvkzkanxujz.supabase.co/functions/v1/rag-search"
 PAYROLL_KNOWLEDGE_PATH = ROOT / "payroll_knowledge.json"
+RAZORPAYX_KNOWLEDGE_PATH = ROOT / "razorpayx_knowledge.json"
 
 AIRAZOR_SYSTEM_PROMPT = """You are AIRazor, a Razorpay merchant discovery assistant.
-Understand the merchant's complete business requirement before recommending a product. Preserve multiple intents and never collapse distinct needs into one product.
+Start from the merchant's business problem, not from Razorpay product names. The merchant should not need to know whether they need Payouts, Smart Collect 2.0, Current Account, Escrow, Payment Gateway, Payroll, or another product.
+Understand the complete requirement before recommending a product. Preserve multiple intents and never collapse distinct needs into one product.
+Ask one or two high-value questions at a time in natural conversation. Do not interrogate the merchant with a checklist.
 Use ONLY the verified Razorpay context supplied by the backend for product facts, features, pricing, eligibility, serviceability, URLs and approvals.
 Never invent Razorpay facts, pricing, plans, limits, serviceability, links or SLAs.
 If verified context is sparse, say what is known, ask the single most useful qualification question, and avoid premature recommendation.
 When the merchant asks whether you understood them, recap all requirements instead of continuing a sales pitch.
-For Payroll conversations, think like a merchant advisor: first identify employee scale, the current payroll/HR setup, and the actual pain point (salary processing, attendance/leave, compliance operations, disbursement, onboarding, reimbursements, reporting, or full-and-final/exit). Then explain only the relevant verified capabilities. Do not force a generic demo.
-When the merchant asks broadly what Payroll does, give a concise capability overview first and then ask one focused qualifier.
-When a merchant gives employee count plus specific pain points, explicitly acknowledge both and explain which Payroll modules should be shown first.
+For outgoing money movement, distinguish vendor/supplier/customer payouts from Payroll and from marketplace escrow.
+For incoming collections, distinguish website/app checkout from direct bank-transfer/UPI collection and reconciliation. Smart Collect 2.0 is especially relevant when the merchant needs unique Customer Identifiers/VPAs and automated reconciliation of NEFT, RTGS, IMPS or UPI transfers.
+Do not recommend Smart Collect 2.0 just because the merchant mentions UPI; confirm that direct-transfer collection/reconciliation is the actual problem.
+Do not recommend Escrow just because the merchant says marketplace; confirm that funds genuinely need controlled holding and release.
+For Payroll conversations, identify employee scale, current payroll/HR setup, and the actual pain point (salary processing, attendance/leave, compliance operations, disbursement, onboarding, reimbursements, reporting, or full-and-final/exit). Then explain only the relevant verified capabilities.
+A personalised product demo is not a second discovery flow. Discovery diagnoses the need; a demo is only a proof step after enough context is captured, showing the exact modules that address the merchant's stated pain points.
 Commercials must always come from approved retrieved context; if no approved price is present, say that pricing needs verification.
-Be concise, natural, specific, and action-oriented.
+Be concise, conversational, specific, and action-oriented.
 """
 
 
@@ -46,13 +52,13 @@ def read_context() -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def read_payroll_knowledge() -> dict[str, Any]:
-    if not PAYROLL_KNOWLEDGE_PATH.exists():
+def read_json_file(path: Path) -> dict[str, Any]:
+    if not path.exists():
         return {}
     try:
-        return json.loads(PAYROLL_KNOWLEDGE_PATH.read_text(encoding="utf-8"))
+        return json.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:
-        print("[AIRazor] Payroll knowledge load failed:", exc, flush=True)
+        print(f"[AIRazor] Knowledge load failed for {path.name}:", exc, flush=True)
         return {}
 
 
@@ -65,7 +71,7 @@ def is_payroll_query(text: str) -> bool:
 
 
 def payroll_verified_context() -> tuple[str, list[str]]:
-    data = read_payroll_knowledge()
+    data = read_json_file(PAYROLL_KNOWLEDGE_PATH)
     if not data:
         return "", []
     chunks = []
@@ -85,6 +91,46 @@ def payroll_verified_context() -> tuple[str, list[str]]:
     if demo:
         chunks.append("PAYROLL DEMO GUIDANCE:\n" + "\n".join(f"- {item}" for item in demo))
     return "\n\n".join(chunks), sources
+
+
+def razorpayx_verified_context(message: str) -> tuple[str, list[str], list[str]]:
+    data = read_json_file(RAZORPAYX_KNOWLEDGE_PATH)
+    if not data:
+        return "", [], []
+    text = message.lower()
+    scored = []
+    for product in data.get("products", []):
+        score = 0
+        for keyword in product.get("keywords", []):
+            if keyword.lower() in text:
+                score += 2 if " " in keyword else 1
+        if score:
+            scored.append((score, product))
+    scored.sort(key=lambda item: item[0], reverse=True)
+    selected = [product for _, product in scored[:3]]
+    if not selected:
+        return "", [], []
+    chunks: list[str] = []
+    sources: list[str] = []
+    product_ids: list[str] = []
+    for product in selected:
+        product_ids.append(product.get("id", "unknown"))
+        product_sources = product.get("sources", []) or []
+        sources.extend(url for url in product_sources if url)
+        chunks.append("\n".join([
+            f"VERIFIED PRODUCT CONTEXT: {product.get('name', 'Razorpay product')}",
+            f"Merchant problem: {product.get('merchant_problem', '')}",
+            "Verified fit:",
+            *[f"- {item}" for item in product.get("fit", [])],
+            "Good conversational qualification questions:",
+            *[f"- {item}" for item in product.get("qualify", [])],
+            "Official sources:",
+            *[f"- {url}" for url in product_sources],
+        ]))
+    rules = data.get("conversation_rules", []) or []
+    if rules:
+        chunks.append("RAZORPAYX DISCOVERY RULES:\n" + "\n".join(f"- {rule}" for rule in rules))
+    return "\n\n".join(chunks), list(dict.fromkeys(sources)), product_ids
 
 
 def rag_search(question: str) -> list[dict[str, Any]]:
@@ -121,27 +167,27 @@ def verified_context(matches: list[dict[str, Any]]) -> str:
     return "\n\n".join(safe)
 
 
-def combined_verified_context(message: str, matches: list[dict[str, Any]]) -> tuple[str, list[str], str]:
+def combined_verified_context(message: str, matches: list[dict[str, Any]]) -> tuple[str, list[str], str, list[str]]:
     parts = []
+    sources: list[str] = []
+    context_labels: list[str] = []
     rag = verified_context(matches)
     if rag:
         parts.append("VERIFIED SUPABASE VECTOR RETRIEVAL:\n" + rag)
-    sources: list[str] = []
-    used_payroll_fallback = False
+        context_labels.append("supabase_rag")
     if is_payroll_query(message):
-        payroll_context, sources = payroll_verified_context()
+        payroll_context, payroll_sources = payroll_verified_context()
         if payroll_context:
             parts.append("VERIFIED OFFICIAL RAZORPAY PAYROLL CONTEXT:\n" + payroll_context)
-            used_payroll_fallback = True
-    if rag and used_payroll_fallback:
-        grounding = "supabase_rag+official_payroll"
-    elif rag:
-        grounding = "supabase_rag"
-    elif used_payroll_fallback:
-        grounding = "official_payroll"
-    else:
-        grounding = "qualification_only"
-    return "\n\n".join(parts), sources, grounding
+            sources.extend(payroll_sources)
+            context_labels.append("official_payroll")
+    x_context, x_sources, x_products = razorpayx_verified_context(message)
+    if x_context:
+        parts.append("VERIFIED OFFICIAL RAZORPAY / RAZORPAYX CONTEXT:\n" + x_context)
+        sources.extend(x_sources)
+        context_labels.append("official_razorpayx")
+    grounding = "+".join(context_labels) if context_labels else "qualification_only"
+    return "\n\n".join(parts), list(dict.fromkeys(sources)), grounding, x_products
 
 
 def slack_webhook_url() -> str:
@@ -154,6 +200,10 @@ def slack_channel_id() -> str:
 
 def slack_configured() -> bool:
     return bool(slack_webhook_url() and slack_channel_id())
+
+
+def did_configured() -> bool:
+    return bool(os.getenv("DID_CLIENT_KEY", "").strip() and os.getenv("DID_AGENT_ID", "").strip())
 
 
 def build_slack_handoff_text(payload: dict[str, Any]) -> str:
@@ -303,9 +353,14 @@ class AIRazorHandler(http.server.SimpleHTTPRequestHandler):
                 "llm_order": provider_order(),
                 "llm_ready": any(providers.values()),
                 "tavus_configured": bool(os.getenv("TAVUS_API_KEY", "").strip()),
+                "did_configured": did_configured(),
+                "did_client_key": os.getenv("DID_CLIENT_KEY", "").strip() if did_configured() else "",
+                "did_agent_id": os.getenv("DID_AGENT_ID", "").strip() if did_configured() else "",
+                "avatar_provider_order": ["tavus", "d-id"],
                 "database": "connected" if rag_ready else "rag_key_missing",
                 "rag_configured": rag_ready,
                 "payroll_verified_context": PAYROLL_KNOWLEDGE_PATH.exists(),
+                "razorpayx_verified_context": RAZORPAYX_KNOWLEDGE_PATH.exists(),
                 "slack_configured": slack_configured(),
                 "slack_channel_id": slack_channel_id(),
                 "handoff_connected": slack_configured(),
@@ -324,7 +379,7 @@ class AIRazorHandler(http.server.SimpleHTTPRequestHandler):
                     self._json_response(400, {"error": "message is required"})
                     return
                 matches = rag_search(message)
-                context, source_urls, grounding = combined_verified_context(message, matches)
+                context, source_urls, grounding, matched_products = combined_verified_context(message, matches)
                 result = generate(AIRAZOR_SYSTEM_PROMPT, chat_prompt(body, context))
                 self._json_response(200, {
                     "ok": True,
@@ -336,7 +391,8 @@ class AIRazorHandler(http.server.SimpleHTTPRequestHandler):
                     "retrieval_count": len(matches),
                     "retrieval_matches": matches,
                     "verified_source_urls": source_urls,
-                    "payroll_context_used": is_payroll_query(message) and bool(source_urls),
+                    "payroll_context_used": is_payroll_query(message) and PAYROLL_KNOWLEDGE_PATH.exists(),
+                    "matched_product_context": matched_products,
                 })
                 return
 
