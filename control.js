@@ -19,22 +19,25 @@
 
   async function refresh() {
     const status = await window.AIRazorAPI.status();
+    const ragReady = Boolean(status.rag_configured && status.database === 'connected');
+    const tavusReady = Boolean(status.tavus_configured);
     badge(backend, 'Online', 'good');
-    badge(tavus, status.tavus_configured ? 'Configured' : 'Pending', status.tavus_configured ? 'good' : 'warn');
-    badge(db, status.database === 'connected' ? 'Connected' : 'Team working', status.database === 'connected' ? 'good' : 'warn');
-    badge(brain, status.llm_ready ? 'Ready' : 'Not ready', status.llm_ready ? 'good' : 'warn');
+    badge(tavus, tavusReady ? 'Configured' : 'Pending', tavusReady ? 'good' : 'warn');
+    badge(db, ragReady ? 'Connected' : 'Not ready', ragReady ? 'good' : 'warn');
+    badge(brain, status.brain_mode === 'rag_grounded' ? 'RAG grounded' : (status.llm_ready ? 'LLM ready' : 'Not ready'), status.llm_ready ? 'good' : 'warn');
     badge(groq, status.llm_providers?.groq ? 'Online' : 'Not configured', status.llm_providers?.groq ? 'good' : 'warn');
     badge(gemini, status.llm_providers?.gemini ? 'Online' : 'Not configured', status.llm_providers?.gemini ? 'good' : 'warn');
     badge(providerOrder, (status.llm_order || []).join(' → ') || '—', '');
+    badge($('ragModeBadge'), ragReady ? 'Supabase RAG active' : 'Qualification only', ragReady ? 'good' : 'warn');
+    badge($('embeddingStatus'), ragReady ? 'RAG endpoint ready' : 'Not verified', ragReady ? 'good' : 'warn');
+    badge($('ragIntegrationStatus'), ragReady ? 'Connected' : 'Not ready', ragReady ? 'good' : 'warn');
+    badge($('tavusIntegrationStatus'), tavusReady ? 'Configured' : 'Not configured', tavusReady ? 'good' : 'warn');
     return status;
   }
 
   async function runLLMTest() {
     const message = (testInput?.value || '').trim();
-    if (!message) {
-      output.textContent = 'Enter a merchant message first.';
-      return;
-    }
+    if (!message) { output.textContent = 'Enter a merchant message first.'; return; }
     runButton.disabled = true;
     runButton.textContent = 'AIRazor is thinking…';
     output.textContent = `NEW TEST STARTED: ${new Date().toLocaleTimeString()}\n\nCalling /api/chat...`;
@@ -45,16 +48,12 @@
         `PROVIDER: ${String(result.provider || 'unknown').toUpperCase()}`,
         `MODEL: ${result.model || 'unknown'}`,
         `GROUNDING: ${result.grounding || 'unknown'}`,
+        `RETRIEVAL COUNT: ${Number(result.retrieval_count || 0)}`,
         `FALLBACK ATTEMPTS: ${(result.fallback_attempts || []).length}`,
         '', 'AIRAZOR:', result.reply || '(empty response)', '', 'RAW RESPONSE:', JSON.stringify(result, null, 2)
       ].join('\n');
     } catch (error) {
-      output.textContent = [
-        `TESTED: ${new Date().toLocaleTimeString()}`,
-        `STATUS: ${error.status || 'unknown'}`,
-        `ERROR: ${error.message}`,
-        '', 'BACKEND PAYLOAD:', JSON.stringify(error.payload || null, null, 2)
-      ].join('\n');
+      output.textContent = [`TESTED: ${new Date().toLocaleTimeString()}`, `STATUS: ${error.status || 'unknown'}`, `ERROR: ${error.message}`, '', 'BACKEND PAYLOAD:', JSON.stringify(error.payload || null, null, 2)].join('\n');
     } finally {
       runButton.disabled = false;
       runButton.textContent = 'Ask AIRazor';
@@ -62,19 +61,9 @@
   }
 
   $('refreshStatus')?.addEventListener('click', () => refresh().catch((error) => { output.textContent = error.message; }));
-  $('testStatus')?.addEventListener('click', async () => {
-    output.textContent = 'Checking backend status...';
-    try { output.textContent = JSON.stringify(await refresh(), null, 2); }
-    catch (error) { output.textContent = error.message; }
-  });
+  $('testStatus')?.addEventListener('click', async () => { output.textContent = 'Checking backend status...'; try { output.textContent = JSON.stringify(await refresh(), null, 2); } catch (error) { output.textContent = error.message; } });
   runButton?.addEventListener('click', runLLMTest);
-
-  // Fallback hook: useful if a browser extension or stale DOM interferes with the normal listener.
   window.runAIRazorControlTest = runLLMTest;
   if (runButton) runButton.onclick = runLLMTest;
-
-  refresh().catch((error) => {
-    badge(backend, 'Offline', 'warn');
-    output.textContent = `Control Room initialization error: ${error.message}`;
-  });
+  refresh().catch((error) => { badge(backend, 'Offline', 'warn'); output.textContent = `Control Room initialization error: ${error.message}`; });
 })();
