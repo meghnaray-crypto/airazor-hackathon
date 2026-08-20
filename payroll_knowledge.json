@@ -1,0 +1,68 @@
+{
+  "product": "RazorpayX Payroll",
+  "verified_on": "2026-08-21",
+  "purpose": "Official Razorpay Payroll context used only when Supabase retrieval is sparse for Payroll questions. This supplements, and does not replace, Supabase RAG.",
+  "sources": [
+    {
+      "title": "Razorpay Payroll",
+      "url": "https://razorpay.com/payroll/",
+      "facts": [
+        "Payroll supports employee lifecycle workflows from hiring through exit.",
+        "Attendance can sync into salary calculations so teams do not need to manually match attendance data to payroll computation.",
+        "Leave, attendance and holidays can be tracked and managed in Payroll.",
+        "Payroll supports HRMS integrations and reporting/analytics capabilities."
+      ]
+    },
+    {
+      "title": "RazorpayX Payroll HR Software",
+      "url": "https://razorpay.com/payroll/hr-software/",
+      "facts": [
+        "The HR software experience covers onboarding to exit management, including full-and-final settlement.",
+        "Leave, attendance and reimbursements can be managed from the same dashboard.",
+        "Employees can use self-service for leaves, pay and tax-related tasks."
+      ]
+    },
+    {
+      "title": "RazorpayX Payroll Attendance Management",
+      "url": "https://razorpay.com/payroll/attendance-management-system/",
+      "facts": [
+        "Employees can mark attendance on the web and attendance can be regularised when corrections are needed.",
+        "Payroll can track attendance and shift timings and can integrate with biometric systems.",
+        "Attendance and leaves can be factored into employee salary calculations and salary disbursement.",
+        "Payroll automates operational statutory compliance work such as TDS, PF, PT and ESIC calculations/payments/filings within the supported scope."
+      ]
+    },
+    {
+      "title": "RazorpayX Payroll Plans",
+      "url": "https://razorpay.com/docs/payroll/plans/",
+      "facts": [
+        "Prime Plan is documented for 11-30 employees.",
+        "Elite Plan is documented for 31-1000 employees.",
+        "Enterprise Plan is documented for 1001+ employees.",
+        "Common plan capabilities include basic payroll functions, compliance payments/calculation/filing, advance payroll and time and attendance."
+      ]
+    },
+    {
+      "title": "RazorpayX Payroll Statutory Compliance",
+      "url": "https://razorpay.com/docs/payroll/statutory-compliance/",
+      "facts": [
+        "Payroll automates operational parts of statutory compliance such as supported payments, calculations and filings.",
+        "Do not claim that every organisation-level statutory registration is handled automatically; scope varies by compliance and current product support."
+      ]
+    }
+  ],
+  "qualification_guidance": [
+    "First understand employee count because it affects plan fit and demo relevance.",
+    "Ask what is painful today: payroll calculation, attendance/leave inputs, compliance operations, salary disbursement, employee onboarding, reimbursements, reports, or full-and-final settlement.",
+    "Ask what the merchant uses today: spreadsheets, HRMS, another payroll provider, or a manual process.",
+    "Ask whether attendance comes from web, biometric devices, another HRMS, or manual sheets when attendance is a pain point.",
+    "For full-and-final needs, understand exit volume/frequency and whether the challenge is calculation, approvals, settlement tracking, or closure.",
+    "Do not force a generic demo. Prioritise only the modules that match the merchant's stated pain points."
+  ],
+  "demo_guidance": [
+    "For a merchant with 120 employees and attendance plus full-and-final pain points, lead with Attendance and F&F / Employee Exit before generic modules.",
+    "For a merchant asking broadly what Payroll can do, explain the major capability areas first, then ask one concise qualification question.",
+    "When employee count is 31-1000 and the merchant asks which documented plan band applies, Elite is the documented plan band; do not invent pricing.",
+    "If the merchant asks for commercials or a price not present in verified retrieved context, say the commercial must be checked from the latest approved source."
+  ]
+}
