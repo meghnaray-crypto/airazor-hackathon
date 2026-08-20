@@ -3,9 +3,14 @@
   const db = document.getElementById('dbStatus');
   const brain = document.getElementById('brainStatus');
   const tavus = document.getElementById('tavusStatusControl');
+  const groq = document.getElementById('groqStatus');
+  const gemini = document.getElementById('geminiStatus');
+  const providerOrder = document.getElementById('providerOrder');
   const output = document.getElementById('apiOutput');
+  const testInput = document.getElementById('llmTestInput');
 
   function badge(el, text, kind) {
+    if (!el) return;
     el.textContent = text;
     el.className = `badge ${kind || ''}`.trim();
   }
@@ -14,9 +19,12 @@
     try {
       const status = await window.AIRazorAPI.status();
       badge(backend, 'Online', 'good');
-      badge(tavus, status.tavus_configured ? 'Configured' : 'Needs key', status.tavus_configured ? 'good' : 'warn');
-      badge(db, status.database && status.database !== 'pending_team_confirmation' ? 'Configured' : 'Pending', status.database && status.database !== 'pending_team_confirmation' ? 'good' : 'warn');
-      badge(brain, status.brain_mode && !status.brain_mode.includes('mock') ? 'Connected' : 'Mock / pending', status.brain_mode && !status.brain_mode.includes('mock') ? 'good' : 'warn');
+      badge(tavus, status.tavus_configured ? 'Configured' : 'Pending', status.tavus_configured ? 'good' : 'warn');
+      badge(db, status.database === 'connected' ? 'Connected' : 'Team working', status.database === 'connected' ? 'good' : 'warn');
+      badge(brain, status.llm_ready ? 'Ready' : 'Not ready', status.llm_ready ? 'good' : 'warn');
+      badge(groq, status.llm_providers?.groq ? 'Online' : 'Not configured', status.llm_providers?.groq ? 'good' : 'warn');
+      badge(gemini, status.llm_providers?.gemini ? 'Online' : 'Not configured', status.llm_providers?.gemini ? 'good' : 'warn');
+      badge(providerOrder, (status.llm_order || []).join(' → ') || '—', '');
       return status;
     } catch (error) {
       badge(backend, 'Offline', 'warn');
@@ -28,25 +36,37 @@
   document.getElementById('refreshStatus').addEventListener('click', refresh);
 
   document.getElementById('testStatus').addEventListener('click', async () => {
+    output.textContent = 'Checking backend status...';
     try {
       const result = await refresh();
       output.textContent = JSON.stringify(result, null, 2);
     } catch (_) {}
   });
 
-  document.getElementById('testChat').addEventListener('click', async () => {
-    output.textContent = 'Testing /api/chat...';
+  document.getElementById('runLLMTest').addEventListener('click', async () => {
+    const message = testInput.value.trim();
+    if (!message) return;
+    output.textContent = 'AIRazor is thinking...';
     try {
       const result = await window.AIRazorAPI.chat({
         session_id: `control-${Date.now()}`,
-        message: 'I have 120 employees and attendance and F&F are painful.',
-        selected_plan_id: null,
-        action: null
+        message,
+        history: []
       });
-      output.textContent = JSON.stringify(result, null, 2);
+      output.textContent = [
+        `PROVIDER: ${String(result.provider || 'unknown').toUpperCase()}`,
+        `MODEL: ${result.model || 'unknown'}`,
+        `GROUNDING: ${result.grounding || 'unknown'}`,
+        `FALLBACK ATTEMPTS: ${(result.fallback_attempts || []).length}`,
+        '',
+        'AIRAZOR:',
+        result.reply || '(empty response)',
+        '',
+        'RAW RESPONSE:',
+        JSON.stringify(result, null, 2)
+      ].join('\n');
     } catch (error) {
       output.textContent = JSON.stringify({
-        expected_for_now: true,
         status: error.status || null,
         message: error.message,
         backend_payload: error.payload || null
