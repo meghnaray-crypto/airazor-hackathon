@@ -1,0 +1,121 @@
+{
+  "verified_on": "2026-08-21",
+  "purpose": "Official Razorpay and RazorpayX context used to supplement Supabase RAG when retrieval is sparse. It must not override newer approved Supabase records or invent commercials.",
+  "products": [
+    {
+      "id": "smart_collect_2",
+      "name": "Smart Collect 2.0",
+      "keywords": ["smart collect", "bank transfer", "neft", "rtgs", "imps", "upi collection", "virtual account", "customer identifier", "vpa", "reconciliation", "incoming transfer", "collect from customers", "collection reconciliation"],
+      "merchant_problem": "The business receives direct bank-transfer or UPI collections from many customers and struggles to identify, match or reconcile each incoming payment.",
+      "fit": [
+        "Creates Customer Identifiers on demand for receiving NEFT, RTGS and IMPS payments.",
+        "Smart Collect 2.0 extends collection to UPI through Virtual UPI IDs / VPAs.",
+        "Automatically reconciles incoming payments against identifiers and provides account-level visibility.",
+        "Supports real-time payment notifications through webhooks.",
+        "Can support many-customers-to-one-account and many-customers-to-many-accounts collection models.",
+        "Third-Party Validation is available for supported Smart Collect flows subject to prerequisites."
+      ],
+      "qualify": [
+        "How do customers pay you today: UPI, NEFT, RTGS, IMPS, payment links, cards, or a mix?",
+        "Is the main problem accepting the payment, or identifying which customer/invoice an incoming transfer belongs to?",
+        "Do you want one identifier per customer, order, invoice or business account?",
+        "Roughly how many incoming transfers do you reconcile in a month?",
+        "Do you need payer validation or restrictions on which bank accounts can pay?"
+      ],
+      "sources": [
+        "https://razorpay.com/smart-collect/",
+        "https://razorpay.com/docs/payments/smart-collect/",
+        "https://razorpay.com/docs/payments/smart-collect/create/",
+        "https://razorpay.com/docs/payments/smart-collect/apis/"
+      ]
+    },
+    {
+      "id": "payouts",
+      "name": "RazorpayX Payouts",
+      "keywords": ["payout", "payouts", "vendor", "supplier", "beneficiary", "contractor", "disbursement", "bulk payout", "api payout", "pay vendors", "refund payout"],
+      "merchant_problem": "The business needs to send money out to vendors, suppliers, contractors, customers or other beneficiaries reliably and at scale.",
+      "fit": [
+        "Payouts are transactions to contacts and their fund accounts.",
+        "Payouts can be created and processed from the RazorpayX Dashboard and through supported APIs.",
+        "Supported payout modes include IMPS, NEFT, RTGS and UPI, subject to product/account rules and limits.",
+        "Businesses can use payout purposes, attachments, summaries, bulk workflows and payout status tracking.",
+        "New merchants should be guided through the currently supported RazorpayX account route and KYC before live payouts."
+      ],
+      "qualify": [
+        "Who are you paying: vendors, suppliers, contractors, employees, customers or another group?",
+        "Roughly how many payouts do you make per day or month?",
+        "Do you want to trigger payouts manually, upload them in bulk, or automate them through APIs?",
+        "Which payout modes matter to you: bank transfer, UPI, or both?",
+        "What is painful today: approvals, beneficiary creation, reconciliation, status tracking, failed payouts, or manual execution?"
+      ],
+      "sources": [
+        "https://razorpay.com/docs/x/payouts/",
+        "https://razorpay.com/docs/x/payouts/status-details/"
+      ]
+    },
+    {
+      "id": "current_account",
+      "name": "RazorpayX Current Account",
+      "keywords": ["current account", "business bank account", "banking", "razorpayx account", "business account"],
+      "merchant_problem": "The business wants a banking account layer for day-to-day business money movement and RazorpayX workflows.",
+      "fit": [
+        "RazorpayX provides business banking capabilities including Current Account and Payouts workflows.",
+        "Account opening, KYC, serviceability and banking-partner approval must be confirmed before activation.",
+        "Do not infer a commercial, minimum balance or approval SLA unless the latest approved record is retrieved."
+      ],
+      "qualify": [
+        "What is the legal entity type and what does the business do?",
+        "Is the account mainly for day-to-day banking, payouts, collections, or a combination?",
+        "What is the approximate monthly transaction volume?",
+        "Do you already have a business current account and, if yes, what is missing from the current setup?"
+      ],
+      "sources": ["https://razorpay.com/docs/x/"]
+    },
+    {
+      "id": "escrow",
+      "name": "RazorpayX Escrow",
+      "keywords": ["escrow", "hold funds", "release funds", "marketplace", "seller settlement", "controlled fund flow", "trustee"],
+      "merchant_problem": "A platform or marketplace needs customer funds to be held or controlled before release to sellers, service providers or another beneficiary group.",
+      "fit": [
+        "Escrow should be explored when the business model genuinely requires controlled holding and release of funds.",
+        "Final structure, serviceability, trustee/bank requirements and commercials require specialist review and approved records.",
+        "Do not confuse ordinary vendor payouts with escrow merely because a merchant has many vendors."
+      ],
+      "qualify": [
+        "Why do funds need to be held before release, and who ultimately receives them?",
+        "Is the marketplace/platform already live?",
+        "How are customer payments collected today?",
+        "What event or condition should trigger release to the seller or service provider?",
+        "Do you have the relevant merchant/vendor agreements and transaction evidence for review?"
+      ],
+      "sources": ["https://razorpay.com/docs/x/"]
+    },
+    {
+      "id": "payment_gateway",
+      "name": "Razorpay Payment Gateway",
+      "keywords": ["payment gateway", "accept payments", "checkout", "website payments", "app payments", "cards", "customer payments", "online payments"],
+      "merchant_problem": "The business needs customers to pay online through a website, app or digital checkout flow.",
+      "fit": [
+        "Payment Gateway is the primary route for online customer payment acceptance across supported payment modes.",
+        "If the real problem is reconciliation of direct bank transfers rather than checkout, evaluate Smart Collect 2.0 instead of defaulting to Payment Gateway.",
+        "If the merchant is a marketplace that must split payments among parties, evaluate the relevant marketplace routing/split-payment product separately."
+      ],
+      "qualify": [
+        "Where will customers pay you: website, mobile app, invoices, links, or direct bank transfer?",
+        "Are payments one-time, recurring, or both?",
+        "What payment modes and monthly volume matter most?",
+        "Is checkout conversion the problem, or is reconciliation/settlement the bigger pain point?"
+      ],
+      "sources": ["https://razorpay.com/docs/payments/"]
+    }
+  ],
+  "conversation_rules": [
+    "The merchant should never need to know Razorpay product names. Start from the business problem and infer the likely product family.",
+    "Ask one or two high-value questions at a time rather than presenting a form-like checklist.",
+    "When two needs are present, preserve both and qualify them separately.",
+    "Do not recommend Smart Collect 2.0 merely because a merchant says UPI. Recommend it when the problem involves direct-transfer collection and reconciliation or unique customer identifiers.",
+    "Do not recommend Payouts merely because a merchant mentions vendors; first confirm these are outgoing business payments and understand scale/automation needs.",
+    "Do not recommend Escrow merely because a merchant is a marketplace; confirm that funds actually need controlled holding/release.",
+    "Never invent pricing, serviceability, activation timelines, links or approval conditions."
+  ]
+}
