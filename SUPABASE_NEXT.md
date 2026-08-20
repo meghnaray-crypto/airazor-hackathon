@@ -1,5 +1,19 @@
 # Supabase next step — do this only after the team confirms current status
 
+## Slack handoff schema (added, ready to apply)
+
+A standalone migration exists at `supabase/migrations/20260820000000_slack_handoff.sql`. It is **additive only** — it does not touch `knowledge_base` or any existing table, so it is safe to apply independently of the RAG work below.
+
+It adds the two pieces the Slack specialist handoff needs on the Supabase side:
+
+- `product_routing_rules` — approved source of truth for which products route to the Slack handoff (replaces hardcoded frontend values). Seeded from `PRODUCT_ROUTING.md`.
+- `specialist_handoffs` — audit log of every handoff dispatched to Slack (one row per `/api/slack/handoff` call), satisfying the contract's "record the next onboarding action" requirement.
+- `resolve_routing(product)` and `log_specialist_handoff(...)` RPCs, callable over the REST `/rpc/` endpoint the Python backend already uses.
+
+Apply it in the Supabase SQL editor or via `supabase db push`. No code change is required for the current `/api/slack/handoff` to keep working — the backend already reads `SLACK_WEBHOOK_URL` / `SLACK_CHANNEL_ID` from Render env. Wiring `/api/slack/handoff` to read routing config from `product_routing_rules` and write to `specialist_handoffs` is the next backend step once the migration is applied.
+
+---
+
 Do not rebuild or delete the database yet.
 
 Ask the team for these five answers:
