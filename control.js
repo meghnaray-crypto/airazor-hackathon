@@ -1,4 +1,9 @@
 (() => {
+  const razorSenseLink = document.createElement('link');
+  razorSenseLink.rel = 'stylesheet';
+  razorSenseLink.href = '/razorsense.css?v=20260821-1';
+  document.head.appendChild(razorSenseLink);
+
   const $ = (id) => document.getElementById(id);
   const backend = $('backendStatus');
   const db = $('dbStatus');
