@@ -1,1 +1,2 @@
-boto3>=1.35,<2
+# AIRazor shared build currently uses Python standard library only.
+# Supabase and LLM calls are made over HTTPS so the hackathon deploy stays lightweight.
