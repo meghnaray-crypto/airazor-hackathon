@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AIRazor Payroll Demo</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="razorsense.css?v=20260821-1" />
   <style>
     body{background:#f6f8fc;color:#13213c}.shell{max-width:1440px;margin:0 auto;padding:22px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:56px;height:56px;border-radius:16px;background:#2f6ee5;color:#fff;display:grid;place-items:center;font-weight:800;font-size:1.4rem}.brand h1{margin:0;font-size:1.25rem}.brand p{margin:3px 0 0;color:#667085}.top-actions{display:flex;gap:10px}.button{border:1px solid #d7deeb;border-radius:12px;padding:11px 16px;background:#fff;color:#13213c;font-weight:700;text-decoration:none;cursor:pointer}.button.primary{background:#2b66da;color:#fff;border-color:#2b66da}.hero{margin-top:20px;background:linear-gradient(120deg,#17396e,#2f69d8);color:#fff;border-radius:28px;padding:34px;display:grid;grid-template-columns:1.4fr .75fr;gap:26px;align-items:center}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;font-weight:800;opacity:.85}.hero h2{font-size:2rem;margin:10px 0}.hero p{margin:0;color:#e5edff;line-height:1.55}.hero-summary{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);border-radius:20px;padding:18px}.hero-summary div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.18)}.hero-summary div:last-child{border-bottom:0}.workspace{display:grid;grid-template-columns:270px minmax(0,1fr) 360px;gap:18px;margin-top:20px}.panel{background:#fff;border:1px solid #dde3ef;border-radius:22px;padding:22px;box-shadow:0 10px 28px rgba(16,24,40,.05)}.panel h3{margin:0 0 16px}.module-list{display:flex;flex-direction:column;gap:10px}.module-button{width:100%;text-align:left;border:1px solid #e1e6ef;background:#fff;border-radius:14px;padding:14px;font-weight:700;color:#344054;cursor:pointer}.module-button.active{border-color:#2b66da;background:#eef4ff;color:#1f56bd}.module-button.focus::after{content:'Priority';float:right;font-size:.68rem;background:#fff1d8;color:#8a4b00;border-radius:999px;padding:3px 6px}.module-button.covered{opacity:.72}.module-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.module-head h3{font-size:1.5rem;margin:8px 0 5px}.module-head p{margin:0;color:#667085}.focus-badge{font-size:.72rem;background:#fff1d8;color:#8a4b00;border-radius:999px;padding:6px 9px;font-weight:800}.screen{border:1px solid #dce4f2;border-radius:18px;margin-top:20px;overflow:hidden}.screen-toolbar{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #e7ebf2}.screen-title{font-weight:800}.demo-label{font-size:.72rem;background:#fff1d8;color:#8a4b00;padding:5px 8px;border-radius:999px;font-weight:700}.screen-body{padding:18px;min-height:260px}.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{border:1px solid #e2e8f2;border-radius:14px;padding:15px}.stat span{display:block;color:#667085;font-size:.76rem}.stat strong{display:block;margin-top:6px}.workflow{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.step{flex:1;min-width:150px;border:1px solid #dbe3f0;border-radius:14px;padding:15px}.step small{display:block;color:#667085;margin-bottom:6px}.fake-table{border:1px solid #e3e8f0;border-radius:14px;overflow:hidden}.fake-row{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px;padding:13px 15px;border-bottom:1px solid #edf0f4}.fake-row:last-child{border-bottom:0}.fake-row.header{background:#f7f9fc;font-weight:800}.module-actions{display:flex;justify-content:space-between;margin-top:18px}.host-card{border:1px solid #d8e3fb;border-radius:18px;background:#f5f8ff;padding:18px}.host-top{display:flex;align-items:center;gap:12px}.host-avatar{width:52px;height:52px;border-radius:50%;background:#2b66da;color:#fff;display:grid;place-items:center;font-weight:800}.host-card p{line-height:1.6;color:#344054}.pain-list{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.chip{font-size:.72rem;border-radius:999px;padding:6px 8px;background:#eef2f8}.chip.focus{background:#fff1d8;color:#8a4b00}.progress-wrap{margin-top:22px}.progress-line{height:9px;background:#eef1f6;border-radius:999px;overflow:hidden}.progress-fill{height:100%;width:0;background:#2b66da}.progress-text{display:flex;justify-content:space-between;font-size:.75rem;color:#667085;margin-top:7px}.summary{margin-top:22px;border:1px solid #e2e8f2;border-radius:16px;padding:16px}.summary ul{padding-left:18px;color:#475467;line-height:1.6}.footer-note{text-align:center;color:#667085;font-size:.78rem;margin:18px 0 0}@media(max-width:1100px){.workspace{grid-template-columns:1fr}.hero{grid-template-columns:1fr}}@media(max-width:700px){.hero{padding:24px}.topbar{align-items:flex-start}.top-actions{flex-direction:column}.stat-grid{grid-template-columns:1fr}}
   </style>
@@ -16,7 +17,7 @@
         <div class="brand-mark">A</div>
         <div>
           <h1>AIRazor · Payroll demo</h1>
-          <p>Hackathon demo shell — personalised by merchant pain point</p>
+          <p>Personalised walkthrough by merchant pain point</p>
         </div>
       </div>
       <div class="top-actions">
@@ -29,7 +30,7 @@
       <div>
         <div class="eyebrow">AI-led demo mode</div>
         <h2 id="heroTitle">A focused Payroll walkthrough</h2>
-        <p id="heroCopy">AIRazor should show only the sections relevant to the merchant instead of forcing a generic end-to-end tour.</p>
+        <p id="heroCopy">AIRazor shows only the sections relevant to the merchant instead of forcing a generic end-to-end tour.</p>
       </div>
       <div class="hero-summary">
         <div><span>Demo merchant</span><strong id="merchantName">Demo company</strong></div>
@@ -75,7 +76,7 @@
             <div class="host-avatar">AI</div>
             <div>
               <strong>Suggested narration</strong>
-              <div style="color:#667085;font-size:.7rem;margin-top:2px">Later spoken by Tavus</div>
+              <div style="color:#667085;font-size:.7rem;margin-top:2px">Spoken by the active AI presenter</div>
             </div>
           </div>
           <p id="narration"></p>
