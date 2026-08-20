@@ -1,5 +1,15 @@
 (() => {
   const BACKEND = 'https://airazor-hackathon.onrender.com';
+  const CONVERSATION_STYLE = `Conversation style for this merchant interaction:
+- Make this feel like a natural sales conversation, not a qualification form.
+- Ask exactly ONE question at a time.
+- Never give the merchant a numbered list of questions to answer.
+- Keep replies to 1-3 short sentences unless the merchant asks for detail.
+- Acknowledge what the merchant just said before moving forward.
+- Reuse facts already provided and never ask for the same detail twice.
+- If you can already give a useful answer, give it first, then ask only the single most useful next question.
+- Do not ask for business model, scale, frequency, current setup and integrations all in one turn. Choose only the one detail that most changes the recommendation.
+- Accept partial answers and continue naturally.`;
   const form = document.getElementById('chatForm');
   const input = document.getElementById('messageInput');
   const send = document.getElementById('sendButton');
@@ -160,7 +170,11 @@
       const response = await fetch(`${BACKEND}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sessionId, message: clean, history: history.slice(-10) })
+        body: JSON.stringify({
+          session_id: sessionId,
+          message: clean,
+          history: [{ role: 'developer', content: CONVERSATION_STYLE }, ...history.slice(-8)]
+        })
       });
       let data = {};
       try { data = await response.json(); } catch (_) {}
@@ -170,11 +184,11 @@
       history.push({ role: 'assistant', content: reply });
       if (status) {
         const count = Number(data.retrieval_count || 0);
-        status.textContent = count > 0 ? `RAG grounded · ${count} source match${count === 1 ? '' : 'es'}` : 'Verified Payroll context';
+        status.textContent = count > 0 ? `RAG grounded · ${count} source match${count === 1 ? '' : 'es'}` : 'Verified context';
       }
       if (modePill) modePill.innerHTML = '<span class="status-dot"></span>Live RAG mode';
     } catch (error) {
-      appendMessage('assistant', `I couldn't reach the live AIRazor brain just now. ${error.message}`);
+      appendMessage('assistant', 'I’m having trouble reaching the live AIRazor brain right now. You can try that once more in a moment.');
       if (status) status.textContent = 'Live backend unavailable';
     } finally {
       send.disabled = false;
