@@ -55,7 +55,7 @@
 
   if (route.handoff_required) {
     routingBanner.textContent = "Payment Gateway products route through the shared AIRazor test handoff channel when specialist involvement is required.";
-    simulationNote.textContent = "This button prepares the payload the real backend will send to Slack. It does not send a Slack message yet.";
+    simulationNote.textContent = "When Slack is configured (SLACK_WEBHOOK_URL in Render), this button sends the merchant context straight to #airazor-test-handoffs. Otherwise it prepares the payload only.";
     simulateButton.textContent = "Prepare Payment Gateway handoff";
   } else {
     routingBanner.textContent = "Smart Collect 2.0 is a RazorpayX product. AIRazor should continue the demo instead of sending it to the Payment Gateway Slack handoff.";
@@ -64,7 +64,7 @@
     simulateButton.textContent = "Prepare AIRazor demo route";
   }
 
-  simulateButton.addEventListener("click", () => {
+  simulateButton.addEventListener("click", async () => {
     const routingPackage = {
       merchant,
       product: route.product,
@@ -85,9 +85,39 @@
 
     payload.textContent = JSON.stringify(routingPackage, null, 2);
     ready.classList.remove("hidden");
-    ready.textContent = route.handoff_required
-      ? "Payment Gateway handoff package ready. Tomorrow the backend will send this through the approved Slack integration."
-      : "AIRazor demo route ready. Smart Collect 2.0 stays in the RazorpayX demo journey.";
-    simulateButton.textContent = route.handoff_required ? "Handoff package prepared" : "AIRazor route prepared";
+
+    if (!route.handoff_required) {
+      ready.textContent = "AIRazor demo route ready. Smart Collect 2.0 stays in the RazorpayX demo journey.";
+      simulateButton.textContent = "AIRazor route prepared";
+      return;
+    }
+
+    try {
+      const statusRes = await fetch("/api/status", { cache: "no-store" });
+      const status = statusRes.ok ? await statusRes.json() : {};
+      if (status.slack_configured) {
+        simulateButton.disabled = true;
+        simulateButton.textContent = "Sending to Slack…";
+        const handoffRes = await fetch("/api/slack/handoff", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(routingPackage)
+        });
+        const handoffData = handoffRes.ok ? await handoffRes.json() : {};
+        if (!handoffRes.ok) throw new Error(handoffData.error || `Backend returned ${handoffRes.status}`);
+        ready.classList.add("good-banner");
+        ready.textContent = `✅ Payment Gateway handoff sent to ${handoffData.channel || route.handoff_destination}. Switch to Slack to view it.`;
+        simulateButton.textContent = "Handoff sent to Slack";
+      } else {
+        ready.textContent = "Payment Gateway handoff package ready. Slack is not yet configured — once SLACK_WEBHOOK_URL is in Render this button will send the real message.";
+        simulateButton.textContent = "Handoff package prepared";
+      }
+    } catch (error) {
+      ready.classList.remove("good-banner");
+      ready.textContent = `Handoff could not be sent: ${error.message}`;
+      simulateButton.textContent = "Retry Payment Gateway handoff";
+    } finally {
+      simulateButton.disabled = false;
+    }
   });
 })();
