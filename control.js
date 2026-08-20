@@ -6,6 +6,7 @@
   const tavus = $('tavusStatusControl');
   const groq = $('groqStatus');
   const gemini = $('geminiStatus');
+  const slack = $('slackStatus');
   const providerOrder = $('providerOrder');
   const output = $('apiOutput');
   const testInput = $('llmTestInput');
@@ -32,6 +33,7 @@
     badge($('embeddingStatus'), ragReady ? 'RAG endpoint ready' : 'Not verified', ragReady ? 'good' : 'warn');
     badge($('ragIntegrationStatus'), ragReady ? 'Connected' : 'Not ready', ragReady ? 'good' : 'warn');
     badge($('tavusIntegrationStatus'), tavusReady ? 'Configured' : 'Not configured', tavusReady ? 'good' : 'warn');
+    badge(slack, status.slack_configured ? 'Connected' : 'Not configured', status.slack_configured ? 'good' : 'warn');
     return status;
   }
 
