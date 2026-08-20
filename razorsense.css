@@ -1,0 +1,214 @@
+:root{
+  --rs-ink:#0f172a;
+  --rs-ink-soft:#334155;
+  --rs-muted:#64748b;
+  --rs-line:#e3e8f2;
+  --rs-canvas:#f7f9fc;
+  --rs-surface:#ffffff;
+  --rs-blue:#2b67f6;
+  --rs-blue-deep:#0b2a66;
+  --rs-cyan:#6bd6ff;
+  --rs-violet:#6b5cff;
+  --rs-success:#0f8a68;
+  --rs-warning:#a15c00;
+  --rs-radius-lg:22px;
+  --rs-radius-md:14px;
+  --rs-shadow:0 14px 34px rgba(20,37,63,.08);
+  --rs-shadow-soft:0 8px 22px rgba(20,37,63,.05);
+}
+
+body{
+  background:
+    radial-gradient(circle at 12% -8%,rgba(107,214,255,.14),transparent 28rem),
+    radial-gradient(circle at 92% 2%,rgba(107,92,255,.10),transparent 26rem),
+    var(--rs-canvas)!important;
+  color:var(--rs-ink)!important;
+}
+
+.app-shell,.shell,.control-shell{position:relative;z-index:0}
+
+.topbar,.control-header{
+  border-bottom:1px solid rgba(227,232,242,.85);
+}
+
+.airazor-logo-mark,.brand-mark{
+  filter:drop-shadow(0 10px 20px rgba(43,103,246,.20));
+}
+
+.hero{
+  position:relative;
+  isolation:isolate;
+  background:
+    radial-gradient(circle at 88% 16%,rgba(107,214,255,.28),transparent 14rem),
+    linear-gradient(118deg,#091c45 0%,#173b87 48%,#2b67f6 100%)!important;
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 28px 60px rgba(15,42,102,.22)!important;
+  overflow:hidden;
+}
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:auto -5% -52px -5%;
+  height:120px;
+  background:
+    radial-gradient(60% 95% at 20% 0%,rgba(255,255,255,.18) 0 58%,transparent 59%),
+    radial-gradient(58% 90% at 78% 8%,rgba(107,214,255,.22) 0 56%,transparent 57%);
+  opacity:.9;
+  transform:skewY(-2deg);
+  pointer-events:none;
+  z-index:-1;
+}
+.hero::after{
+  content:"";
+  position:absolute;
+  width:360px;
+  height:360px;
+  right:-96px;
+  bottom:-205px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 0 0 42px rgba(255,255,255,.035),0 0 0 86px rgba(107,214,255,.025);
+  background:rgba(255,255,255,.035)!important;
+}
+.hero h1,.hero h2{letter-spacing:-.055em!important}
+.hero-badge,.hero-summary{
+  border:1px solid rgba(255,255,255,.20)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.07))!important;
+  backdrop-filter:blur(18px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.chat-panel,.side-card,.panel,.control-card,.debug-panel,.journey-stepper{
+  background:rgba(255,255,255,.96)!important;
+  border:1px solid var(--rs-line)!important;
+  box-shadow:var(--rs-shadow-soft)!important;
+}
+.chat-panel,.side-card,.panel,.control-card{border-radius:var(--rs-radius-lg)!important}
+.side-card,.panel,.control-card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.side-card:hover,.panel:hover,.control-card:hover{
+  transform:translateY(-1px);
+  border-color:#d7deec!important;
+  box-shadow:var(--rs-shadow)!important;
+}
+
+.panel-kicker,.eyebrow{
+  letter-spacing:.17em!important;
+  font-weight:800!important;
+}
+.panel-kicker{color:#245fd6!important}
+
+.primary-button,.send-button,.button.primary{
+  background:linear-gradient(135deg,#245edc,#2f73ff)!important;
+  border-color:transparent!important;
+  box-shadow:0 10px 24px rgba(43,103,246,.22)!important;
+}
+.primary-button:hover,.send-button:hover,.button.primary:hover{
+  transform:translateY(-1px) scale(1.005)!important;
+  box-shadow:0 13px 28px rgba(43,103,246,.27)!important;
+}
+.secondary-button,.button,.prompt-chip,.inline-action{
+  border:1px solid var(--rs-line)!important;
+  background:linear-gradient(180deg,#fff,#fbfcff)!important;
+  box-shadow:0 1px 0 rgba(15,23,42,.02);
+}
+.prompt-chip{
+  border-radius:999px!important;
+  transition:border-color .16s ease,background .16s ease,transform .16s ease;
+}
+.prompt-chip:hover,.inline-action:hover{
+  transform:translateY(-1px);
+  border-color:#adc4fb!important;
+  background:#f4f8ff!important;
+}
+
+.composer{
+  border:1px solid #d4deef!important;
+  box-shadow:0 12px 28px rgba(31,54,89,.07)!important;
+}
+.composer:focus-within{
+  border-color:#7da8ff!important;
+  box-shadow:0 0 0 4px rgba(43,103,246,.09),0 12px 28px rgba(31,54,89,.08)!important;
+}
+
+.bubble{
+  background:linear-gradient(180deg,#f5f7fb,#eef3f9)!important;
+  border:1px solid #e8edf5;
+}
+.message.user .bubble{
+  background:linear-gradient(135deg,#245edc,#2f73ff)!important;
+  border-color:transparent!important;
+  box-shadow:0 8px 18px rgba(43,103,246,.16);
+}
+.avatar,.host-avatar,.tavus-avatar-placeholder{
+  background:linear-gradient(145deg,#143b8d,#2f73ff)!important;
+  box-shadow:0 8px 22px rgba(43,103,246,.20);
+}
+
+.journey-stepper{
+  backdrop-filter:blur(16px);
+}
+.step-number{
+  box-shadow:inset 0 0 0 1px rgba(15,23,42,.02);
+}
+.journey-step.active .step-number{
+  background:linear-gradient(135deg,#245edc,#2f73ff)!important;
+  box-shadow:0 0 0 5px rgba(43,103,246,.10)!important;
+}
+
+.status-pill,.outline-pill,.confidence-pill,.badge,.focus-badge,.demo-label,.chip{
+  border-radius:999px!important;
+}
+.status-pill,.badge.good{
+  background:#edf9f5!important;
+  color:#0f765b!important;
+}
+
+.small-status{
+  background:#f3f6fb!important;
+  border:1px solid #e6ebf4;
+}
+
+.tavus-card,.host-card{
+  background:
+    radial-gradient(circle at 90% 0%,rgba(107,214,255,.10),transparent 12rem),
+    linear-gradient(180deg,#ffffff,#f8fbff)!important;
+  border-color:#ccdaf7!important;
+}
+
+.payment-card,.activation-card,.success-box{
+  background:
+    radial-gradient(circle at 100% 0%,rgba(15,138,104,.10),transparent 12rem),
+    linear-gradient(180deg,#fff,#f7fcfa)!important;
+}
+
+.screen,.fake-table,.stat,.step,.summary{
+  border-color:#e2e8f2!important;
+  box-shadow:0 1px 0 rgba(15,23,42,.015);
+}
+.screen-toolbar,.fake-row.header{
+  background:linear-gradient(180deg,#fbfcff,#f7f9fc)!important;
+}
+.module-button{
+  transition:all .16s ease;
+}
+.module-button.active{
+  border-color:#8fb2ff!important;
+  background:linear-gradient(180deg,#f4f8ff,#edf4ff)!important;
+  color:#1e56c5!important;
+  box-shadow:inset 3px 0 0 #2b67f6;
+}
+
+.control-card h2,.panel h3,.side-card h3{
+  letter-spacing:-.025em;
+}
+
+footer,.footer-note{color:#7b8799!important}
+
+@media (prefers-reduced-motion:no-preference){
+  .status-dot{animation:rsPulse 2.1s ease-in-out infinite}
+  @keyframes rsPulse{0%,100%{box-shadow:0 0 0 4px rgba(33,168,120,.10)}50%{box-shadow:0 0 0 8px rgba(33,168,120,.025)}}
+}
+
+@media(max-width:900px){
+  .hero::before{height:90px;bottom:-46px}
+}
