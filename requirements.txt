@@ -1,2 +1,1 @@
-# Current shared build uses Python standard library only.
-# Add backend SDKs here when Supabase/LLM endpoints are wired.
+boto3>=1.35,<2
