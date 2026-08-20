@@ -84,47 +84,18 @@ def _gemini(system_prompt: str, user_prompt: str) -> tuple[str, str]:
     return text, model
 
 
-def _bedrock(system_prompt: str, user_prompt: str) -> tuple[str, str]:
-    try:
-        import boto3
-    except ImportError as exc:
-        raise RuntimeError("boto3 is not installed") from exc
-
-    region = os.getenv("AWS_REGION", "ap-south-1").strip()
-    model = os.getenv("BEDROCK_MODEL_ID", "").strip()
-    if not model:
-        raise RuntimeError("BEDROCK_MODEL_ID not configured")
-
-    client = boto3.client("bedrock-runtime", region_name=region)
-    response = client.converse(
-        modelId=model,
-        system=[{"text": system_prompt}],
-        messages=[{"role": "user", "content": [{"text": user_prompt}]}],
-        inferenceConfig={"temperature": 0.2, "maxTokens": 1400},
-    )
-    text = (((response.get("output") or {}).get("message") or {}).get("content") or [{}])[0].get("text", "").strip()
-    if not text:
-        raise RuntimeError("Amazon Bedrock returned an empty response")
-    return text, model
-
-
-PROVIDERS = {"groq": _groq, "gemini": _gemini, "bedrock": _bedrock}
+PROVIDERS = {"groq": _groq, "gemini": _gemini}
 
 
 def configured_providers() -> dict[str, bool]:
     return {
         "groq": bool(os.getenv("GROQ_API_KEY", "").strip()),
         "gemini": bool(os.getenv("GEMINI_API_KEY", "").strip()),
-        "bedrock": bool(
-            os.getenv("BEDROCK_MODEL_ID", "").strip()
-            and os.getenv("AWS_ACCESS_KEY_ID", "").strip()
-            and os.getenv("AWS_SECRET_ACCESS_KEY", "").strip()
-        ),
     }
 
 
 def provider_order() -> list[str]:
-    raw = os.getenv("LLM_PROVIDER_ORDER", "groq,gemini,bedrock")
+    raw = os.getenv("LLM_PROVIDER_ORDER", "groq,gemini")
     order = [item.strip().lower() for item in raw.split(",") if item.strip()]
     return [item for item in order if item in PROVIDERS]
 
