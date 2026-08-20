@@ -1,5 +1,16 @@
 (() => {
   const BACKEND = "https://airazor-hackathon.onrender.com";
+  const CONVERSATION_STYLE = `Conversation style for the live presenter:
+- Speak like a calm Razorpay relationship manager, not a form or questionnaire.
+- Ask exactly ONE question at a time.
+- Keep most replies to 1-3 short sentences.
+- Acknowledge the merchant's last answer first.
+- Never present a numbered list of questions.
+- Never ask for several details in one turn.
+- Remember details already shared and do not ask again.
+- If enough context exists, give a useful answer before asking one next question.
+- Accept short or partial answers and move forward naturally.
+- Prefer simple transitions such as “Got it”, “That helps”, “Understood”, then one focused next question.`;
   const history = [];
   let recognition = null;
   let listening = false;
@@ -11,26 +22,12 @@
 
   function chooseDefaultVoice() {
     const voices = allVoices();
-    const preferred = [
-      /Rishi/i,
-      /Microsoft Prabhat/i,
-      /Daniel/i,
-      /Alex/i,
-      /Google UK English Male/i,
-      /Microsoft Ryan/i,
-      /Google.*English.*India/i,
-      /Samantha/i,
-      /Microsoft Aria/i,
-      /Google UK English Female/i,
-      /Google US English/i
-    ];
+    const preferred = [/Rishi/i,/Microsoft Prabhat/i,/Daniel/i,/Alex/i,/Google UK English Male/i,/Microsoft Ryan/i,/Google.*English.*India/i,/Samantha/i,/Microsoft Aria/i,/Google UK English Female/i,/Google US English/i];
     for (const pattern of preferred) {
       const match = voices.find((voice) => pattern.test(voice.name));
       if (match) return match;
     }
-    return voices.find((voice) => /en-IN/i.test(voice.lang)) ||
-      voices.find((voice) => /^en-(GB|US)/i.test(voice.lang)) ||
-      voices.find((voice) => /^en/i.test(voice.lang)) || null;
+    return voices.find((voice) => /en-IN/i.test(voice.lang)) || voices.find((voice) => /^en-(GB|US)/i.test(voice.lang)) || voices.find((voice) => /^en/i.test(voice.lang)) || null;
   }
 
   function selectedVoice() {
@@ -44,8 +41,8 @@
     const utterance = new SpeechSynthesisUtterance(text);
     const voice = selectedVoice();
     if (voice) utterance.voice = voice;
-    utterance.rate = 0.9;
-    utterance.pitch = 0.93;
+    utterance.rate = 0.92;
+    utterance.pitch = 0.98;
     utterance.volume = 1;
     utterance.onstart = () => root?.classList.add("airazor-speaking");
     utterance.onend = () => root?.classList.remove("airazor-speaking");
@@ -60,7 +57,7 @@
       body: JSON.stringify({
         session_id: "presenter-live-session",
         message,
-        history: history.slice(-12)
+        history: [{ role: "developer", content: CONVERSATION_STYLE }, ...history.slice(-8)]
       }),
       cache: "no-store"
     });
@@ -87,8 +84,8 @@
       .tavus-frame-shell:has(#airazor3DPresenter){height:auto!important;max-height:none!important;overflow:visible!important;aspect-ratio:auto!important;background:transparent!important}
       .tavus-frame-shell:has(#airazor3DPresenter) iframe{display:none!important}
       #airazor3DPresenter{min-height:0!important;border:1px solid #d8e4fb!important;border-radius:18px!important;overflow:visible!important;background:linear-gradient(180deg,#eef5ff 0%,#f9fbff 62%,#fff 100%)!important}
-      #airazor3DPresenter #airazor3DCanvas{height:240px!important;border-radius:18px 18px 0 0;overflow:hidden}
-      #airazor3DPresenter > div:nth-child(2){padding:0 18px 12px!important}
+      #airazor3DPresenter #airazor3DCanvas{height:220px!important;border-radius:18px 18px 0 0;overflow:hidden}
+      #airazor3DPresenter > div:nth-child(2){padding:0 18px 10px!important}
       #airazor3DPresenter #airazor3DText{display:none!important}
       #airazor3DPresenter #airazor3DReplay{display:none!important}
       .airazor-presenter-console{border-top:1px solid #dfe8f7;background:#fff;border-radius:0 0 18px 18px;padding:14px}
@@ -96,7 +93,7 @@
       .airazor-presenter-title{font-size:13px;font-weight:800;color:#17223b}
       .airazor-presenter-live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#17654f;background:#eaf8f2;border-radius:999px;padding:5px 8px}
       .airazor-presenter-live:before{content:"";width:7px;height:7px;border-radius:50%;background:#20a978}
-      .airazor-presenter-transcript{max-height:170px;overflow:auto;background:#f7f9fd;border:1px solid #e4e9f3;border-radius:12px;padding:10px;margin-bottom:10px}
+      .airazor-presenter-transcript{max-height:155px;overflow:auto;background:#f7f9fd;border:1px solid #e4e9f3;border-radius:12px;padding:10px;margin-bottom:10px}
       .airazor-presenter-turn{margin:0 0 9px}.airazor-presenter-turn:last-child{margin-bottom:0}
       .airazor-presenter-turn span{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7a879c;margin-bottom:3px}
       .airazor-presenter-turn p{margin:0;font-size:12px;line-height:1.48;color:#344054}
@@ -127,21 +124,15 @@
     const consoleEl = document.createElement("div");
     consoleEl.className = "airazor-presenter-console";
     consoleEl.innerHTML = `
-      <div class="airazor-presenter-topline">
-        <div class="airazor-presenter-title">Talk to AIRazor</div>
-        <div class="airazor-presenter-live">Live conversation</div>
-      </div>
+      <div class="airazor-presenter-topline"><div class="airazor-presenter-title">Talk naturally with AIRazor</div><div class="airazor-presenter-live">Live conversation</div></div>
       <div id="airazorPresenterTranscript" class="airazor-presenter-transcript" aria-live="polite"></div>
       <div class="airazor-presenter-input-row">
-        <input id="airazorPresenterInput" type="text" autocomplete="off" placeholder="Ask a follow-up question…" aria-label="Ask AIRazor presenter" />
+        <input id="airazorPresenterInput" type="text" autocomplete="off" placeholder="Say what you're trying to solve…" aria-label="Ask AIRazor presenter" />
         <button id="airazorPresenterMic" type="button" aria-label="Use microphone" title="Speak">🎙</button>
         <button id="airazorPresenterSend" type="button">Ask</button>
       </div>
       <button id="airazorPresenterTalk" class="airazor-talk-button" type="button">Tap to speak to AIRazor</button>
-      <div class="airazor-presenter-tools">
-        <div id="airazorPresenterHint" class="airazor-presenter-hint">Use the mic or type. AIRazor will answer and speak back.</div>
-        <select id="airazorPresenterVoice" class="airazor-voice-select" aria-label="Presenter voice"></select>
-      </div>`;
+      <div class="airazor-presenter-tools"><div id="airazorPresenterHint" class="airazor-presenter-hint">Just speak normally. AIRazor will ask one thing at a time.</div><select id="airazorPresenterVoice" class="airazor-voice-select" aria-label="Presenter voice"></select></div>`;
     root.appendChild(consoleEl);
 
     const input = root.querySelector("#airazorPresenterInput");
@@ -152,7 +143,7 @@
     const transcript = root.querySelector("#airazorPresenterTranscript");
     const voiceSelect = root.querySelector("#airazorPresenterVoice");
 
-    addMessage(transcript, "assistant", "Hi. Ask me about your business requirement and I’ll walk you through the relevant Razorpay setup.");
+    addMessage(transcript, "assistant", "Hi — tell me what you're trying to solve. I'll keep it simple and take it one step at a time.");
 
     function populateVoices() {
       const voices = allVoices().filter((voice) => /^en/i.test(voice.lang));
@@ -164,10 +155,7 @@
         voiceSelect.appendChild(option);
       });
       const best = selectedVoice();
-      if (best) {
-        activeVoiceName = activeVoiceName || best.name;
-        voiceSelect.value = activeVoiceName;
-      }
+      if (best) { activeVoiceName = activeVoiceName || best.name; voiceSelect.value = activeVoiceName; }
     }
     populateVoices();
     if ("speechSynthesis" in window) window.speechSynthesis.addEventListener?.("voiceschanged", populateVoices);
@@ -176,9 +164,7 @@
     async function submit(messageOverride = "") {
       const message = (messageOverride || input.value || "").trim();
       if (!message) return;
-      send.disabled = true;
-      mic.disabled = true;
-      talk.disabled = true;
+      send.disabled = true; mic.disabled = true; talk.disabled = true;
       hint.textContent = "AIRazor is thinking…";
       addMessage(transcript, "user", message);
       history.push({ role: "user", content: message });
@@ -188,25 +174,20 @@
         const reply = result.reply || "I couldn't generate an answer just now. Please try that again.";
         history.push({ role: "assistant", content: reply });
         addMessage(transcript, "assistant", reply);
-        hint.textContent = result.grounding === "supabase_rag" ? "Answered using Razorpay knowledge context." : "Answered using AIRazor qualification mode.";
+        hint.textContent = "You can answer naturally — one step at a time.";
         speak(reply, root);
       } catch (error) {
-        const fallback = "I can continue the conversation, but the live AIRazor brain is temporarily unavailable. Try that once more.";
+        const fallback = "I can continue, but the live AIRazor brain is temporarily unavailable. Try that once more.";
         addMessage(transcript, "assistant", fallback);
         hint.textContent = "Backend temporarily unavailable.";
         speak(fallback, root);
       } finally {
-        send.disabled = false;
-        mic.disabled = false;
-        talk.disabled = false;
-        input.focus();
+        send.disabled = false; mic.disabled = false; talk.disabled = false; input.focus();
       }
     }
 
     send.addEventListener("click", () => submit());
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") { event.preventDefault(); submit(); }
-    });
+    input.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); submit(); } });
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -214,63 +195,24 @@
       recognition.lang = "en-IN";
       recognition.interimResults = true;
       recognition.continuous = false;
-
-      recognition.onstart = () => {
-        listening = true;
-        mic.classList.add("listening");
-        talk.classList.add("listening");
-        talk.textContent = "Listening… tap to stop";
-        hint.textContent = "Listening now. Speak naturally.";
-      };
-      recognition.onresult = (event) => {
-        let transcriptText = "";
-        for (let i = event.resultIndex; i < event.results.length; i += 1) transcriptText += event.results[i][0].transcript;
-        input.value = transcriptText.trim();
-      };
-      recognition.onend = () => {
-        listening = false;
-        mic.classList.remove("listening");
-        talk.classList.remove("listening");
-        talk.textContent = "Tap to speak to AIRazor";
-        const captured = (input.value || "").trim();
-        if (captured) submit(captured);
-        else hint.textContent = "I didn't catch that. Tap the button and try again.";
-      };
-      recognition.onerror = (event) => {
-        listening = false;
-        mic.classList.remove("listening");
-        talk.classList.remove("listening");
-        talk.textContent = "Tap to speak to AIRazor";
-        const reason = event.error === "not-allowed" ? "Microphone permission is blocked. Allow microphone access in the browser address bar and try again." : "I couldn't start voice recognition. You can still type your question.";
-        hint.textContent = reason;
-      };
-
+      recognition.onstart = () => { listening = true; mic.classList.add("listening"); talk.classList.add("listening"); talk.textContent = "Listening… tap to stop"; hint.textContent = "Listening — speak normally."; };
+      recognition.onresult = (event) => { let transcriptText = ""; for (let i = event.resultIndex; i < event.results.length; i += 1) transcriptText += event.results[i][0].transcript; input.value = transcriptText.trim(); };
+      recognition.onend = () => { listening = false; mic.classList.remove("listening"); talk.classList.remove("listening"); talk.textContent = "Tap to speak to AIRazor"; const captured = (input.value || "").trim(); if (captured) submit(captured); else hint.textContent = "I didn't catch that. Tap the button and try again."; };
+      recognition.onerror = (event) => { listening = false; mic.classList.remove("listening"); talk.classList.remove("listening"); talk.textContent = "Tap to speak to AIRazor"; hint.textContent = event.error === "not-allowed" ? "Microphone permission is blocked. Allow microphone access in the browser address bar and try again." : "I couldn't start voice recognition. You can still type your question."; };
       async function toggleMic() {
         try {
           if (listening) { recognition.stop(); return; }
-          if (navigator.mediaDevices?.getUserMedia) {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            stream.getTracks().forEach((track) => track.stop());
-          }
+          if (navigator.mediaDevices?.getUserMedia) { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); stream.getTracks().forEach((track) => track.stop()); }
           recognition.start();
-        } catch (error) {
-          hint.textContent = "Microphone access is blocked. Click the lock/site-controls icon near the URL, allow Microphone, then try again.";
-        }
+        } catch (error) { hint.textContent = "Microphone access is blocked. Click the lock/site-controls icon near the URL, allow Microphone, then try again."; }
       }
-      mic.addEventListener("click", toggleMic);
-      talk.addEventListener("click", toggleMic);
+      mic.addEventListener("click", toggleMic); talk.addEventListener("click", toggleMic);
     } else {
-      mic.disabled = true;
-      talk.disabled = true;
-      talk.textContent = "Voice input unavailable in this browser";
-      hint.textContent = "This browser doesn't expose speech recognition. Type your question below; AIRazor will still speak the response.";
+      mic.disabled = true; talk.disabled = true; talk.textContent = "Voice input unavailable in this browser"; hint.textContent = "Type naturally below; AIRazor will still speak the response.";
     }
   }
 
-  function scan() {
-    buildControls(document.getElementById("airazor3DPresenter"));
-  }
-
+  function scan() { buildControls(document.getElementById("airazor3DPresenter")); }
   scan();
   new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
 })();
