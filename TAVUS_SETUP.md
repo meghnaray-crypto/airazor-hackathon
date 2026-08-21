@@ -1,122 +1,126 @@
 # AIRazor + Tavus CVI setup
 
-AIRazor uses Tavus CVI as the primary live avatar layer. The backend keeps Tavus keys server-side and can now fail over across two Tavus accounts before dropping to the visual fallback layer.
+This build adds a server-side Tavus CVI connector to the existing AIRazor localhost UI.
 
-## Recommended Render setup
+## Important naming note
 
-Keep both Tavus accounts as separate environment variables. Do not overwrite one account with the other.
+The human-like real-time video platform discussed for AIRazor is **Tavus CVI**.
+There is also a company called **Torus**, but that product is focused on Voice AI.
+This package integrates Tavus CVI.
 
-Primary account:
+## What already works
 
-```text
-TAVUS_API_KEY_PRIMARY
-<primary Tavus key>
+- Existing AIRazor localhost frontend
+- Merchant profile / qualification demo
+- Plans / commercials demo
+- Developer view
+- Tavus server-side connection status
+- Tavus test-mode conversation creation
+- Live Tavus conversation creation
+- Tavus conversation embedded inside AIRazor
+- End-conversation endpoint
+- Automatic fallback to the next free localhost port if 8000 is busy
+
+## What deliberately remains pending
+
+- Supabase connection
+- Real RAG
+- Real qualification engine
+- Real LLM-driven AIRazor conversation state
+- Payment-link API
+- Production onboarding action
+
+Do not fake these until the team confirms the current database state.
+
+## 1. Create your Tavus API key
+
+In the Tavus Developer Portal, create an API key.
+
+Do **not** paste the key into `app.js`, `index.html`, screenshots, or chat messages.
+
+## 2. Set the key in Terminal
+
+From the AIRazor project folder:
+
+```bash
+export TAVUS_API_KEY='YOUR_TAVUS_API_KEY'
 ```
 
-Secondary account:
+The prototype defaults to the stock Replica and Persona IDs shown in Tavus's official quickstart documentation.
 
-```text
-TAVUS_API_KEY_SECONDARY
-<secondary Tavus key>
+If your Tavus account gives you your own IDs, set them too:
+
+```bash
+export TAVUS_REPLICA_ID='YOUR_REPLICA_ID'
+export TAVUS_PERSONA_ID='YOUR_PERSONA_ID'
 ```
 
-For backward compatibility, the existing variable is still supported:
+## 3. Start AIRazor
 
-```text
-TAVUS_API_KEY
-<existing Tavus key>
+```bash
+python3 server.py
 ```
 
-If `TAVUS_API_KEY_PRIMARY` is present, AIRazor automatically uses it as the primary key. If it is absent, the existing `TAVUS_API_KEY` remains the primary account.
+The server automatically picks the next free port if 8000 is already occupied.
 
-## Replica and Persona IDs
-
-If both Tavus accounts can use the same stock/default Replica and Persona IDs, no additional variables are needed.
-
-If the two accounts have different Replica or Persona IDs, add:
+For example:
 
 ```text
-TAVUS_REPLICA_ID_PRIMARY
-<primary replica id>
-
-TAVUS_PERSONA_ID_PRIMARY
-<primary persona id>
-
-TAVUS_REPLICA_ID_SECONDARY
-<secondary replica id>
-
-TAVUS_PERSONA_ID_SECONDARY
-<secondary persona id>
+Open: http://127.0.0.1:8001
 ```
 
-The original aliases remain supported:
+Open that URL in Chrome.
 
-```text
-TAVUS_REPLICA_ID
-TAVUS_PERSONA_ID
-```
+## 4. First use `Test Tavus connection`
 
-## Failover order
+This sends Tavus a conversation request with `test_mode=true`.
 
-When the merchant clicks **Start live AIRazor demo**, the runtime now follows this sequence:
+In Tavus test mode, a conversation object is created but the replica does not join the call. Use this first so you can verify credentials and configuration without starting a live avatar session.
 
-```text
-Primary Tavus account
-        |
-        | quota / credits / auth / network failure
-        v
-Secondary Tavus account
-        |
-        | unavailable
-        v
-D-ID when configured
-        |
-        v
-AIRazor 3D presenter fallback
-```
+## 5. Then use `Start live AIRazor demo`
 
-The merchant does not need to choose an account. Failover happens server-side.
+AIRazor will:
 
-## How the automatic failover works
+1. Ask the local Python backend to create a Tavus CVI conversation.
+2. Keep the API key on the server.
+3. Receive the Tavus `conversation_url`.
+4. Embed the live session in the AIRazor UI.
 
-`sitecustomize.py` is loaded by Python when the AIRazor server starts. It keeps the existing `server.py` Tavus integration intact while adding a secure server-side retry layer.
-
-For Tavus requests it:
-
-1. Uses `TAVUS_API_KEY_PRIMARY` when configured, otherwise the existing `TAVUS_API_KEY`.
-2. Sends the normal Tavus request.
-3. If the primary account fails because of an HTTP/API/network error, retries once with `TAVUS_API_KEY_SECONDARY`.
-4. When secondary Replica/Persona IDs are configured, substitutes those IDs for secondary conversation creation.
-5. Never sends either Tavus API key to the AIRazor browser UI.
-
-Render logs may show:
-
-```text
-[AIRazor] Tavus primary account failed (HTTPError); trying secondary Tavus account.
-```
-
-No secret values are logged.
-
-## Current architecture
+## Architecture
 
 ```text
 AIRazor browser UI
         |
+        | same-origin API
         v
-Render Python backend
+local Python backend
         |
-        +---- Supabase RAG / RazorpayX knowledge
-        +---- Gemini / Groq LLM routing
-        +---- Tavus primary account
-        |          |
-        |          +----> Tavus secondary account on failure
-        |
-        +---- D-ID / 3D visual fallback
+        | x-api-key kept server-side
+        v
+Tavus CVI
+```
+
+Later, after the database is confirmed:
+
+```text
+AIRazor UI
+   |
+   v
+AIRazor backend
+   |---- conversation state
+   |---- Supabase / RAG
+   |---- qualification + serviceability
+   |---- LLM
+   |---- demo controller
+   |
+   +---- Tavus CVI (human face / voice)
+   |
+   +---- approved payment/onboarding actions
 ```
 
 ## Files to know
 
-- `server.py` — AIRazor backend and Tavus endpoints
-- `sitecustomize.py` — secure Tavus multi-account failover layer
-- `tavus.js` — frontend presenter controls and avatar-provider fallback
-- `tavus_conversational_context.txt` — live presenter conversation behaviour
+- `server.py` — localhost server + secure Tavus API proxy
+- `tavus.js` — frontend Tavus controls
+- `tavus_conversational_context.txt` — AIRazor live-demo behavior
+- `SUPABASE_NEXT.md` — exact database work to do once the team confirms status
